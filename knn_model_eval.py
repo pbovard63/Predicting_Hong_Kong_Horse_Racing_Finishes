@@ -15,6 +15,7 @@ import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import GridSearchCV
 
 plt.rcParams['figure.figsize'] = (9, 6)
 sns.set(context='notebook', style='whitegrid', font_scale=1.2)
@@ -64,8 +65,8 @@ def KNN_accuracy_scorer(X, y, n = 5):
     
     #scoring:
     print("The accuracy score for kNN is")
-    print("Training: {:6.2f}%".format(100*knn.score(X_train, y_train)))
-    print("Validation set: {:6.2f}%".format(100*knn.score(X_val, y_val)))
+    print("Training: {:6.2f}%".format(100*knn.score(X_train_scaled, y_train)))
+    print("Validation set: {:6.2f}%".format(100*knn.score(X_val_scaled, y_val)))
     print("Validation Set F1 Score: {:6.4f}:".format(f1_score(y_val, y_pred)))
     print("Validation set Precision: {:6.4f}".format(precision))
     print("Validation set recall: {:6.4f} \n".format(recall))
