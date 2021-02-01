@@ -41,7 +41,7 @@ def log_precision_and_recall_curves(X,y,C=0.95):
     '''
     
     #Split Data, fit log regression model:
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5, stratify=y)
     
     #Standard Scaling of Features
     std = StandardScaler()
@@ -70,7 +70,7 @@ def log_precision_recall_curve_generator(X,y,C=0.95):
     Returns: a precision and recall curve.
     '''
     #Split Data, fit log regression model:
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5, stratify=y)
     
     #Standard Scaling of Features
     std = StandardScaler()
@@ -97,14 +97,14 @@ def log_precision_recall_curve_generator(X,y,C=0.95):
     plt.legend()
     plt.title("Precision-Recall Curve");
 
-def log_accuracy_scorer(X, y, threshold=0.5, C=0.95):
+def log_accuracy_scorer(X, y, threshold=0.5, C=0.95, beta=0.5):
     '''
     Arguments: takes in a set of features X and a target variable y.  Y is a classification (0/1).  Default C is 0.95, can be changed.
     Also includes a threshold, default of 0.5, 
     Returns: Performs logistic regression classification and returns the feature coefficeints and returns the score.
     '''
     #Splitting into train and val sets:
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5, stratify=y)
     
     #Standard Scaling of Features
     std = StandardScaler()
@@ -133,13 +133,18 @@ def log_accuracy_scorer(X, y, threshold=0.5, C=0.95):
     
     #Recall:
     recall = recall_score(y_val, y_predict)
+
+    #Scoring F1 and Fbeta
+    f1score = f1_score(y_val, y_predict)
+    fbetascore = fbeta_score(y_val, y_predict, beta=beta)
     
     #Reporting Results:
     print("The accuracy score for logistic regression w/ threshold of {} is:".format(threshold))
     #print("Training set accuracy: {:6.2f}%".format(100*logit.score(X_train, y_train)))
     print("Validation set accuracy: {:6.2f}%".format(100*val_accuracy))
     print("Additional Model Metrics:")
-    print("Validation Set F1 Score: {:6.4f}:".format(f1_score(y_val, y_predict)))
+    print("Validation Set F1 Score: {:6.4f}:".format(f1score))
+    print("Validation Set Fbeta Score (beta={}): {:6.4f}".format(beta, fbetascore))
     print("Validation set Precision: {:6.4f}".format(precision))
     print("Validation set recall: {:6.4f} \n".format(recall))
     print("Validation set log-loss score: {:6.4f}".format(log_loss(y_val, y_predict)))
@@ -153,7 +158,7 @@ def log_roc_curve_generator(X,y,C=0.95):
     Returns: a ROC curve for the data.
     '''
     #Splitting into train and val sets:
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5, stratify=y)
     
     #Standard Scaling of Features
     std = StandardScaler()
@@ -171,6 +176,9 @@ def log_roc_curve_generator(X,y,C=0.95):
     J = tpr-fpr
     opt = np.argmax(J)
     optimal_threshold = thresholds[opt]
+
+    #Max. TPR (Precision):
+    max_pres = thresholds[np.argmax(tpr)]
     
     #Plotting:
     plt.plot(fpr, tpr,lw=2, label = 'ROC Curve')
@@ -184,3 +192,4 @@ def log_roc_curve_generator(X,y,C=0.95):
     plt.title('ROC curve for Horses Showing - Logistic Regression Model');
     print("ROC AUC score = ", roc_auc_score(y_val, y_preds))
     print('Optimal Threshold: {:6.4f}'.format(optimal_threshold))
+    print('Threshold for Max Precision: {:6.4f}'.format(max_pres))

@@ -35,13 +35,13 @@ def confusion_matrix_generator(confusion_matrix, name):
     plt.title('{} confusion matrix'.format(name));
     
 
-def KNN_accuracy_scorer(X, y, n = 5):
+def KNN_accuracy_scorer(X, y, n = 5, beta=0.5):
     '''
     Arguments: takes in a set of features X and a target variable y.  Y is a classification (0/1).  Default n is 5, can be changed.
     Returns: Performs K nearest neighbors classification and returns the feature coefficeints and returns the score.
     '''
     #Splitting into train and val sets:
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5, stratify=y)
 
     #Standard Scaling of Features
     std = StandardScaler()
@@ -59,6 +59,10 @@ def KNN_accuracy_scorer(X, y, n = 5):
     
     #Recall:
     recall = recall_score(y_val, y_pred)
+
+    #Scoring F1 and Fbeta
+    f1score = f1_score(y_val, y_pred)
+    fbetascore = fbeta_score(y_val, y_pred, beta=beta)
     
     #Confusion Matrix:
     cm = confusion_matrix(y_val, y_pred)
@@ -68,6 +72,7 @@ def KNN_accuracy_scorer(X, y, n = 5):
     print("Training: {:6.2f}%".format(100*knn.score(X_train_scaled, y_train)))
     print("Validation set: {:6.2f}%".format(100*knn.score(X_val_scaled, y_val)))
     print("Validation Set F1 Score: {:6.4f}:".format(f1_score(y_val, y_pred)))
+    print("Validation Set Fbeta Score (beta={}): {:6.4f}".format(beta, fbetascore))
     print("Validation set Precision: {:6.4f}".format(precision))
     print("Validation set recall: {:6.4f} \n".format(recall))
     confusion_matrix_generator(cm, 'KNN')
