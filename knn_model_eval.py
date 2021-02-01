@@ -1,7 +1,7 @@
 '''
 Functions to evaluate a K-Nearest Neighbors (KNN) model for a machine learning classification problem.
 '''
-
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 from sklearn import datasets
 from sklearn.metrics import roc_auc_score, roc_curve
@@ -41,11 +41,17 @@ def KNN_accuracy_scorer(X, y, n = 5):
     '''
     #Splitting into train and val sets:
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=5)
+
+    #Standard Scaling of Features
+    std = StandardScaler()
+    std.fit(X_train.values)
+    X_train_scaled = std.transform(X_train.values)
+    X_val_scaled = std.transform(X_val.values)
     
     #Running KNN:
     knn = KNeighborsClassifier(n_neighbors = n)
-    knn.fit(X_train, y_train)
-    y_pred = knn.predict(X_val)
+    knn.fit(X_train_scaled, y_train)
+    y_pred = knn.predict(X_val_scaled)
 
     #Precision:
     precision = precision_score(y_val, y_pred)
