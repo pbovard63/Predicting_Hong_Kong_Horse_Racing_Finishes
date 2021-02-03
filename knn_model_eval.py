@@ -16,6 +16,7 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
 
 plt.rcParams['figure.figsize'] = (9, 6)
 sns.set(context='notebook', style='whitegrid', font_scale=1.2)
@@ -45,8 +46,7 @@ def KNN_accuracy_scorer(X, y, n = 5, beta=0.5):
 
     #Standard Scaling of Features
     std = StandardScaler()
-    std.fit(X_train.values)
-    X_train_scaled = std.transform(X_train.values)
+    X_train_scaled = std.fit_transform(X_train.values)
     X_val_scaled = std.transform(X_val.values)
     
     #Running KNN:
@@ -75,4 +75,5 @@ def KNN_accuracy_scorer(X, y, n = 5, beta=0.5):
     print("Validation Set Fbeta Score (beta={}): {:6.4f}".format(beta, fbetascore))
     print("Validation set Precision: {:6.4f}".format(precision))
     print("Validation set recall: {:6.4f} \n".format(recall))
+    print(classification_report(y_val, y_pred))
     confusion_matrix_generator(cm, 'KNN')

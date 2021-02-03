@@ -45,8 +45,7 @@ def log_precision_and_recall_curves(X,y,C=0.95):
     
     #Standard Scaling of Features
     std = StandardScaler()
-    std.fit(X_train.values)
-    X_train_scaled = std.transform(X_train.values)
+    X_train_scaled = std.fit_transform(X_train.values)
     X_val_scaled = std.transform(X_val.values)
     
     logit = LogisticRegression(solver='lbfgs', C = C)
@@ -74,8 +73,7 @@ def log_precision_recall_curve_generator(X,y,C=0.95):
     
     #Standard Scaling of Features
     std = StandardScaler()
-    std.fit(X_train.values)
-    X_train_scaled = std.transform(X_train.values)
+    X_train_scaled = std.fit_transform(X_train.values)
     X_val_scaled = std.transform(X_val.values)
     
     logit = LogisticRegression(solver='lbfgs', C = C)
@@ -108,8 +106,7 @@ def log_accuracy_scorer(X, y, threshold=0.5, C=0.95, beta=0.5):
     
     #Standard Scaling of Features
     std = StandardScaler()
-    std.fit(X_train.values)
-    X_train_scaled = std.transform(X_train.values)
+    X_train_scaled = std.fit_transform(X_train.values)
     X_val_scaled = std.transform(X_val.values)
     
     #Running Logistic Regression, fitting the model:
@@ -162,8 +159,7 @@ def log_roc_curve_generator(X,y,C=0.95):
     
     #Standard Scaling of Features
     std = StandardScaler()
-    std.fit(X_train.values)
-    X_train_scaled = std.transform(X_train.values)
+    X_train_scaled = std.fit_transform(X_train.values)
     X_val_scaled = std.transform(X_val.values)
     
     #Running Logistic Regression, fitting the model:
