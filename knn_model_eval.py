@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+from sklearn.model_selection import KFold
 
 plt.rcParams['figure.figsize'] = (9, 6)
 sns.set(context='notebook', style='whitegrid', font_scale=1.2)
@@ -77,3 +78,73 @@ def KNN_accuracy_scorer(X, y, n = 5, beta=0.5):
     print("Validation set recall: {:6.4f} \n".format(recall))
     print(classification_report(y_val, y_pred))
     confusion_matrix_generator(cm, 'KNN')
+    
+def KNN_accuracy_scorer_f_fold(X, y, n = 5, k=5):
+    '''
+    Arguments: takes in a set of features X and a target variable y.  Y is a classification (0/1).  Default n is 5, can be changed.
+    Returns: Performs K nearest neighbors classification and returns the feature coefficeints and returns the score.
+    '''
+
+    #Standard Scaling of Features
+    std = StandardScaler()
+    X_scaled = std.fit_transform(X.values)
+    
+    #Creating CV arrays:
+    X_cv, y_cv = np.array(X_scaled), np.array(y)
+    kf = KFold(n_splits=k, shuffle=True, random_state = 12)
+    
+    #Setting up empty lists for the stats:
+    cv_knn_acc = []
+    cv_knn_prec = []
+    cv_knn_rec = []
+    cv_knn_fbeta = []
+    cv_knn_f1 = []
+    
+    i = 1
+    #K-Fold Loop:
+    for train_ind, val_ind in kf.split(X_cv, y_cv):
+        X_train_scaled, y_train = X_cv[train_ind], y_cv[train_ind]
+        X_val_scaled, y_val = X_cv[val_ind], y_cv[val_ind] 
+    
+        #Running KNN:
+        knn = KNeighborsClassifier(n_neighbors = n)
+        knn.fit(X_train_scaled, y_train)
+        y_pred = knn.predict(X_val_scaled)
+
+            
+        #Accuracy:
+        cv_knn_acc.append(knn.score(X_val_scaled, y_val))
+                          
+        #Precision:
+        cv_knn_prec.append(precision_score(y_val, y_pred))
+    
+        #Recall:
+        cv_knn_rec.append(recall_score(y_val, y_pred))
+
+        #Scoring F1 and Fbeta
+        cv_knn_f1.append(f1_score(y_val, y_pred))
+        cv_knn_fbeta.append(fbeta_score(y_val, y_pred, beta=0.5))
+
+        #Printing Confusion Matrix for each round:
+        cm = confusion_matrix(y_val, y_pred)
+        print("Confusion Matrix for Fold {}".format(i))
+        print(cm)
+        print('\n')
+        i += 1
+
+    
+    #Reporting Results:
+    print('KNN Classification w/ KFOLD CV Results (k={}):'.format(k))
+    print('KNN Accuracy scores: ', cv_knn_acc, '\n')
+    print(f'Simple mean cv accuracy: {np.mean(cv_knn_acc):.3f} + {np.std(cv_knn_acc):.3f} \n')
+    print('KNN Precision scores: ', cv_knn_prec, '\n')
+    print(f'Simple mean cv precision: {np.mean(cv_knn_prec):.3f} +- {np.std(cv_knn_prec):.3f} \n')
+    print('KNN Recall scores: ', cv_knn_rec, '\n')
+    print(f'Simple mean cv recall: {np.mean(cv_knn_rec):.3f} +- {np.std(cv_knn_rec):.3f} \n')
+    print('KNN Fbeta (beta=0.5) scores: ', cv_knn_fbeta, '\n')
+    print(f'Simple mean cv Fbeta (beta=0.5): {np.mean(cv_knn_fbeta):.3f} +- {np.std(cv_knn_fbeta):.3f} \n')
+    print('KNN F1 scores: ', cv_knn_f1, '\n')
+    print(f'Simple mean cv F1: {np.mean(cv_knn_f1):.3f} +- {np.std(cv_knn_f1):.3f} \n')
+
+    return knn
+

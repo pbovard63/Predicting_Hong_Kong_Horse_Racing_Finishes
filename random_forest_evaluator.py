@@ -21,6 +21,7 @@ from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib import pyplot
+from sklearn.model_selection import KFold
 
 def confusion_matrix_generator(confusion_matrix, name):
     '''
@@ -119,3 +120,76 @@ def random_forest_eval_oversampled(X,y):
     confusion_matrix_generator(cm, 'Random Forest')
 
     return rf_model
+
+
+def random_forest_eval_kfold(X,y, k=5, threshold = 0.5):
+    '''
+    Arguments: takes in an X and y data set, and k, a number of cross folds. K is set at 5 as default.
+    Returns: Results of Random Forest Classification with K-Fold Validation
+    '''
+    X_cv, y_cv = np.array(X), np.array(y)
+    kf = KFold(n_splits=k, shuffle=True, random_state = 12)
+    
+    #Setting up empty lists:
+    cv_rf_acc = []
+    cv_rf_prec = []
+    cv_rf_rec = []
+    cv_rf_fbeta = []
+    cv_rf_f1 = []
+    
+    #K-Fold Loop:
+    i = 1
+    for train_ind, val_ind in kf.split(X_cv,y_cv):
+        X_train, y_train = X_cv[train_ind], y_cv[train_ind]
+        X_val, y_val = X_cv[val_ind], y_cv[val_ind] 
+    
+        #Running Model and making predictions:
+        rf_model = RandomForestClassifier()
+        rf_model.fit(X_train, y_train)
+
+        y_pred = (rf_model.predict_proba(X_val)[:, 1] >= threshold)
+        #y_pred = rf_model.predict(X_val)
+
+        #Printing Confusion Matrix for each round:
+        cm = confusion_matrix(y_val, y_pred)
+        print("Confusion Matrix for Fold {}".format(i))
+        print(cm)
+        print('\n')
+        i += 1
+    
+        #Scores:
+        cv_rf_acc.append(rf_model.score(X_val, y_val))
+        cv_rf_prec.append(precision_score(y_val, y_pred))
+        cv_rf_rec.append(recall_score(y_val, y_pred))
+        cv_rf_fbeta.append(fbeta_score(y_val, y_pred, beta=0.5))
+        cv_rf_f1.append(f1_score(y_val, y_pred))
+    
+    print('Random Forest Classification w/ KFOLD CV Results (k={}, threshold = {}):'.format(k, threshold))
+    print('Random Forest Accuracy scores: ', cv_rf_acc, '\n')
+    print(f'Simple mean cv accuracy: {np.mean(cv_rf_acc):.3f} + {np.std(cv_rf_acc):.3f}')
+    print('Random Forest Precision scores: ', cv_rf_prec, '\n')
+    print(f'Simple mean cv precision: {np.mean(cv_rf_prec):.3f} +- {np.std(cv_rf_prec):.3f}')
+    print('Random Forest Recall scores: ', cv_rf_rec, '\n')
+    print(f'Simple mean cv recall: {np.mean(cv_rf_rec):.3f} +- {np.std(cv_rf_rec):.3f}')
+    print('Random Forest Fbeta (beta=0.5) scores: ', cv_rf_fbeta, '\n')
+    print(f'Simple mean cv Fbeta (beta=0.5): {np.mean(cv_rf_fbeta):.3f} +- {np.std(cv_rf_fbeta):.3f}')
+    print('Random Forest F1 scores: ', cv_rf_f1, '\n')
+    print(f'Simple mean cv F1: {np.mean(cv_rf_f1):.3f} +- {np.std(cv_rf_f1):.3f}')
+
+    return rf_model
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

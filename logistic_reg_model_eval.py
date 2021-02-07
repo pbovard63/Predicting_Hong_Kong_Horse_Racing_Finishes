@@ -16,6 +16,7 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import log_loss
+from sklearn.model_selection import KFold
 
 plt.rcParams['figure.figsize'] = (9, 6)
 sns.set(context='notebook', style='whitegrid', font_scale=1.2)
@@ -189,3 +190,86 @@ def log_roc_curve_generator(X,y,C=0.95):
     print("ROC AUC score = ", roc_auc_score(y_val, y_preds))
     print('Optimal Threshold: {:6.4f}'.format(optimal_threshold))
     print('Threshold for Max Precision: {:6.4f}'.format(max_pres))
+    
+def log_accuracy_scorer_k_fold(X, y, k=5, threshold=0.5, C=0.95):
+    '''
+    Arguments: takes in a set of features X and a target variable y.  Y is a classification (0/1).  Default C is 0.95, can be changed.
+    Also includes a threshold, default of 0.5, and a k value (default 5) for number of folds to use in k-fold cross validation.
+    Returns: Performs logistic regression classification and returns the feature coefficeints and returns the score.
+    '''
+      
+    #Standard Scaling of Features
+    std = StandardScaler()
+    X_scaled = std.fit_transform(X.values)
+    
+    #Creating CV arrays:
+    X_cv, y_cv = np.array(X_scaled), np.array(y)
+    kf = KFold(n_splits=k, shuffle=True, random_state = 12)
+    
+    #Setting up empty lists for the stats:
+    cv_log_acc = []
+    cv_log_prec = []
+    cv_log_rec = []
+    cv_log_fbeta = []
+    cv_log_f1 = []
+    cv_log_ll = []
+    
+
+    counter = 1
+    #K-Fold Loop:
+    for train_ind, val_ind in kf.split(X_cv, y_cv):
+        X_train_scaled, y_train = X_cv[train_ind], y_cv[train_ind]
+        X_val_scaled, y_val = X_cv[val_ind], y_cv[val_ind]
+        
+        #Running Logistic Regression, fitting the model:
+        logit = LogisticRegression(solver='lbfgs', C = C)
+        logit.fit(X_train_scaled, y_train)
+
+        #Confusion Matrix, utilizing threshold:
+        y_predict = (logit.predict_proba(X_val_scaled)[:,1] >= threshold)
+        
+        #Calculating Validation Accuracy, w/ threshold:
+        acc = 0
+        y_val_array = np.asarray(y_val, dtype=bool)
+        for i, y in enumerate(y_predict):
+            if y == y_val_array[i]:
+                acc += 1
+        val_accuracy = acc/y_predict.shape[0]
+        cv_log_acc.append(val_accuracy)
+        
+        #Precision:
+        cv_log_prec.append(precision_score(y_val, y_predict))
+    
+        #Recall:
+        cv_log_rec.append(recall_score(y_val, y_predict))
+
+        #Scoring F1 and Fbeta
+        cv_log_f1.append(f1_score(y_val, y_predict))
+        cv_log_fbeta.append(fbeta_score(y_val, y_predict, beta=0.5))
+        
+        #Log Loss:
+        cv_log_ll.append(log_loss(y_val, y_predict))
+
+        #Printing Confusion Matrix for each round:
+        cm = confusion_matrix(y_val, y_predict)
+        print("Confusion Matrix for Fold {}".format(counter))
+        print(cm)
+        print('\n')
+        counter += 1
+    
+    #Reporting Results:
+    print('Logistic Regression Classification w/ KFOLD CV Results (k={}):'.format(k))
+    print('Log. Reg Accuracy scores: ', cv_log_acc, '\n')
+    print(f'Simple mean cv accuracy: {np.mean(cv_log_acc):.3f} + {np.std(cv_log_acc):.3f} \n')
+    print('Log. Reg Precision scores: ', cv_log_prec, '\n')
+    print(f'Simple mean cv precision: {np.mean(cv_log_prec):.3f} +- {np.std(cv_log_prec):.3f} \n')
+    print('Log. Reg Recall scores: ', cv_log_rec, '\n')
+    print(f'Simple mean cv recall: {np.mean(cv_log_rec):.3f} +- {np.std(cv_log_rec):.3f} \n')
+    print('Log. Reg Fbeta (beta=0.5) scores: ', cv_log_fbeta, '\n')
+    print(f'Simple mean cv Fbeta (beta=0.5): {np.mean(cv_log_fbeta):.3f} +- {np.std(cv_log_fbeta):.3f} \n')
+    print('Log. Reg F1 scores: ', cv_log_f1, '\n')
+    print(f'Simple mean cv F1: {np.mean(cv_log_f1):.3f} +- {np.std(cv_log_f1):.3f} \n')
+    print('Log. Reg Log Loss scores: ', cv_log_ll, '\n')
+    print(f'Simple mean cv log loss: {np.mean(cv_log_ll):.3f} +- {np.std(cv_log_ll):.3f} \n')
+    
+    return logit
