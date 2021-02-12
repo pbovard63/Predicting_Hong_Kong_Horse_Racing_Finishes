@@ -42,6 +42,7 @@ The final model for this project utilized an XGBoost Classifier, with hyper para
 On the final training set, the XGBoost classification model had a **59.1% precision** with an **FBeta Score of 0.454**.  
 
 Final Model Confusion Matrix on the Test Set:  
+
 ![](images/final_confusion_matrix_image.png) 
 
 Tuned XGBoost Hyperparameters used:
@@ -54,7 +55,7 @@ Tuned XGBoost Hyperparameters used:
 | subsample           | 0.4                       |
 | colsample_bytree    | 0.4                       |
 
-**Navigating the Repo:**
+**Navigating the Repo / Process:**
 - SQL Queries are in the SQL_Queries folder.  This includes two files:
   - initial_sql_and_data_scoping.ipynb: initial look through the data, and creating tables to use in machine learning
   - feature_engineering_sql.ipynb: Contains more advanced SQL queries to engineer new features for previous race performances (i.e. rolling average), how a horse compared to the other horses in the race (i.e. comparison of weight, rating, and age to field average), and various other stats
@@ -72,4 +73,11 @@ Tuned XGBoost Hyperparameters used:
   - model_4_xgboost.ipynb: XGBoost
   - race_split_data_test.ipynb: Model Comparison between KNN, RandomForest, XGBoost, and Logistic Regression 
 - Final Model: selection of final model, and tuning of the XGBoost classifier, along with Test Set performance, results, and error analysis.
-  - Final_Modeling_nb.ipynb
+  - Final_Modeling_nb.ipynb.  The final comparison across the 3 final models, in terms of mean Precision and FBeta scores from K-Fold cross validation are below:  
+
+| Model Type              | Mean Precision Score |Mean FBeta (beta = 0.5 Score)|
+| ------------------------| ---------------------|-----------------------------|
+| Logistic Regression     | .618 +- .028         | .361 +- .010                |
+| Random Forest (untuned) | .583 +- .006         | .458 +- .005                |
+| XGBoost (untuned)       | .603 +- .007         | .474 +- .008
+  
