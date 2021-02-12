@@ -41,8 +41,8 @@ The final model for this project utilized an XGBoost Classifier, with hyper para
 
 On the final training set, the XGBoost classification model had a **59.1% precision** with an **FBeta Score of 0.454**.  
 
-Final Model Confusion Matrix on the Test Set: 
-![](images/final_model_confusion_matrix_image.png)  
+Final Model Confusion Matrix on the Test Set:  
+![](images/final_confusion_matrix_image.png) 
 
 Tuned XGBoost Hyperparameters used:
 | Hyperparameter      | Value Used in Final Model |
@@ -65,7 +65,7 @@ Tuned XGBoost Hyperparameters used:
   - XGBoost Classification (xgboost_evaluator.py)
 - Slides prepared for my presentation of this project are in the Final_Presentation folder.  This includes both Powerpoint and PDF files.
 - Data utilized in this project is in the Data folder.  This includes the original race and run csv files, as well as the various round of Pandas dataframes I engineerd in .pkl files.  The data used in the final model was **training_horses_final.pkl** for training/validation and **testing_horses_final.pkl** for testing the model.
-- Early Models: earlier models are contained in the Early_Models folder of the repo.  This contains the following, in order of earliest to latest (earliest at the top of the model):
+- Early Models: earlier models are contained in the Early_Models folder of the repo.  This contains the following, in order of earliest to latest (earliest at the top of the model), along with which techniques were used:
   - initial_model_eda.ipynb: Logistic Regression, K-Nearest Neighbors (KNN)
   - second_model.ipynb: Logistic Regression, KNN
   - model_3_random_forest_naive_bayes.ipynb: RandomForest, Naive Bayes
